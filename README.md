@@ -1,11 +1,14 @@
 # Panjat Sengsara
 
-Game manjat buat live TikTok. Lu manjat, penonton ngejatuhin lewat gift & komen.
+Game manjat 3D buat live TikTok. Lu manjat, penonton ngejatuhin lewat gift & komen.
 
 ```
-game.html   game + overlay OBS (buka langsung, gak perlu server)
-server.py   TikTok gift/komen -> WebSocket ke game
-test.js     cek fisika tanpa browser
+game.html     game 3D (three.js) + overlay OBS, buka langsung gak perlu server
+three.min.js  three.js r158, offline
+server.py     TikTok gift/komen -> WebSocket ke game
+app.py        server + game dalam satu jendela (bahan .exe)
+build.bat     bikin dist\PanjatSengsara.exe
+test.js       cek fisika tanpa browser
 ```
 
 ## Butuh
@@ -18,9 +21,15 @@ test.js     cek fisika tanpa browser
 
 ```bash
 pip install TikTokLive websockets
+pip install pywebview pyinstaller   # cuma kalau mau bikin .exe
 ```
 
-## Jalanin
+## Jalanin (.exe)
+
+Double-click `PanjatSengsara.exe`, ketik username host (atau `PanjatSengsara.exe @username`). Jendela game + server jalan bareng, gak perlu Python.
+Masukin ke OBS lewat **Window Capture**. Bikin exe-nya: `build.bat` → `dist\PanjatSengsara.exe` (~20 MB, butuh WebView2 = bawaan Windows 10/11).
+
+## Jalanin (manual)
 
 **1. Coba tanpa TikTok** — buka `game.html` di browser, klik halaman, main:
 
@@ -72,6 +81,7 @@ node test.js               # fisika: bisa manjat, platform kejangkau, sabotase j
 
 ## Masalah umum
 
+- **Jendela .exe putih kosong + error `in use`** → instance sebelumnya belum tutup total. Tunggu beberapa detik, buka lagi.
 - **Server gak nyambung ke TikTok** → pastiin akunnya lagi live dan username pakai `@`. Kalau kena rate limit, coba lagi beberapa menit.
 - **Gak ada suara** → browser blokir audio sebelum ada klik. Klik halaman sekali. Di OBS, centang *Control audio via OBS*.
 - **Keyboard gak jalan di OBS** → klik kanan source → *Interact*, main lewat jendela itu.

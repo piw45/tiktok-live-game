@@ -1,5 +1,6 @@
 // node test.js — cek fisika game tanpa browser
-const noop=new Proxy(function(){},{get:()=>noop,apply:()=>noop,set:()=>true});
+const noop=new Proxy(function(){},{get:(t,k)=>k===Symbol.toPrimitive?()=>0:noop,apply:()=>noop,set:()=>true,construct:()=>noop});
+global.THREE=noop;global.devicePixelRatio=1;let seed=13;Math.random=()=>(seed=seed*16807%2147483647)/2147483647;  // deterministik
 const els={};const el=id=>els[id]||(els[id]={innerHTML:'',textContent:'',className:'',children:[],insertAdjacentHTML(){this.children.push(1)},classList:{add(){},remove(){},toggle(){}},offsetWidth:0,style:{},firstChild:{nodeValue:''},lastChild:{remove(){}}});
 const cnv=()=>({getContext:()=>noop,width:0,height:0});
 global.document={getElementById:id=>id==='c'?cnv():el(id),createElement:cnv,body:{classList:{toggle(){},add(){},remove(){}}}};
