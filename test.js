@@ -29,8 +29,9 @@ sabotage({type:'wind',dir:-1,user:'x',gift:'Rose',coins:1});keys[' ']=0;keys.Arr
 console.assert(p.vx<0,'wind should push left',p.vx);
 // vanish removes standing platform
 keys[' ']=1;for(let i=0;i<300;i++){tNow+=16.67;step(1)};keys[' ']=0;for(let i=0;i<60;i++)step(1);
-const n=plats.length,on=p.on;sabotage({type:'vanish',user:'y',gift:'Galaxy',coins:100});for(let i=0;i<50;i++){tNow+=16.67;step(1)}
-console.assert(on.floor||plats.length<n,'vanish failed',plats.length,n);
+const on=p.on;sabotage({type:'vanish',user:'y',gift:'Galaxy',coins:100});for(let i=0;i<50;i++){tNow+=16.67;step(1)}
+console.assert(on.floor||on.gone,'vanish failed');
+for(let i=0;i<200;i++){tNow+=16.67;step(1)}console.assert(!on.gone,'vanished platform should come back');
 // bantuan: perisai nangkis sabotase, tangga nambah pijakan, penolong masuk papan
 sabotage({type:'shield',user:'ani',gift:'Rose',coins:1});const h1=height;
 sabotage({type:'reset',user:'jahat',gift:'Galaxy',coins:1000});step(1);

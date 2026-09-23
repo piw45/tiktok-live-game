@@ -222,7 +222,7 @@ function sabotage(ev){
   toast(`${avatar(ev.user,ev.avatar)}<div class="who">${esc(ev.user)}</div><div class="gift">${ev.img?`<img src="${esc(ev.img)}" referrerpolicy="no-referrer" alt="">`:''}${esc(ev.gift)}</div><div class="what px">${what}</div>`,SAB[ev.type]?ev.type:'bantu');
 }
 function vanish(){   // yang dipijak + satu di atasnya, biar gak bisa langsung lompat aman
-  const near=plats.filter(q=>!q.floor&&q.y>camY&&q.y<camY+VH).sort((a,b)=>Math.abs(a.y-p.y)-Math.abs(b.y-p.y));
+  const near=plats.filter(q=>!q.floor&&!q.gone&&q.y>camY&&q.y<camY+VH).sort((a,b)=>Math.abs(a.y-p.y)-Math.abs(b.y-p.y));
   for(const pl of [p.on&&!p.on.floor?p.on:near[0],near.find(q=>q.y<p.y-20)])if(pl)pl.warn=400;
 }
 function test(k){sabotage({type:['wind','wind','slip','quake','vanish','reset','shield','boost','stair'][k-1],dir:k==1?-1:1,user:'TEST',gift:'tombol '+k,coins:1})}
@@ -265,7 +265,7 @@ function step(dt){
   const prevY=p.y,wasOn=p.on;p.vy+=G*dt;p.y+=p.vy*dt;p.x+=p.vx*dt;
   if(p.x<0){p.x=0;p.vx=0}if(p.x>WW-p.w){p.x=WW-p.w;p.vx=0}
   p.on=null;
-  if(p.vy>=0)for(const pl of plats)if(prevY<=pl.y+.01&&p.y>=pl.y&&p.x+p.w>pl.x&&p.x<pl.x+pl.w){
+  if(p.vy>=0)for(const pl of plats)if(!pl.gone&&prevY<=pl.y+.01&&p.y>=pl.y&&p.x+p.w>pl.x&&p.x<pl.x+pl.w){
     const drop=(p.y-groundY)/10;p.y=pl.y;   // turun berapa meter dari titik tolak, bukan dari puncak lompatan
     if(pl.spring){p.vy=JUMP*1.5;SFX.jump();spawn(8,p.x+p.w/2,p.y,'#FACC15',{sy:3})}
     else{if(!wasOn&&p.vy>4)p.landed=1;p.vy=0;p.on=pl;if(pl.crumb&&!pl.warn)pl.warn=pl.crumb;
@@ -273,7 +273,8 @@ function step(dt){
         spawn(22,p.x+p.w/2,p.y,['#94A3B8','#DC2626'],{sx:7,sy:3,s:3})}}
     break}
   if(p.on)groundY=p.y;
-  for(let i=plats.length-1;i>=0;i--){const pl=plats[i];if(pl.warn){pl.warn-=ms;if(pl.warn<=0){plats.splice(i,1);scene.remove(pl.mesh);if(p.on===pl)p.on=null;spawn(14,pl.x+pl.w/2,pl.y+5,['#7F1D1D','#DC2626'],{sx:pl.w/6,sy:3,life:50,s:3})}}}
+  for(const pl of plats){if(pl.gone&&(pl.gone-=ms)<=0){pl.gone=0;if(pl.mesh)pl.mesh.visible=true}   // balik lagi, kalau nggak celahnya kegedean buat dilompatin (lompat max ~144px)
+    if(pl.warn){pl.warn-=ms;if(pl.warn<=0){pl.warn=0;pl.gone=3000;if(pl.mesh)pl.mesh.visible=false;if(p.on===pl)p.on=null;spawn(14,pl.x+pl.w/2,pl.y+5,['#7F1D1D','#DC2626'],{sx:pl.w/6,sy:3,life:50,s:3})}}}
   height=Math.max(0,-p.y/10);if(height>best){best=height;save()}
   if(best>=nextMile){SFX.rekor();toast(`<div class="what px">REKOR ${nextMile}m!</div>`,'rekor');spawn(40,p.x+p.w/2,p.y-20,['#FACC15','#22C55E','#22D3EE','#DC2626'],{sx:8,sy:6,life:70,s:3});nextMile+=10}
   if(height>=goal){SFX.menang();flash();save(1);toast(`<div class="what px">TARGET ${goal}m TEMBUS!</div>`,'rekor');
