@@ -150,7 +150,7 @@ const R2=rnd(13),cloudMat=mat('#E2E8F0',{transparent:true,opacity:0}),CLOUDS=Arr
   box(w,12,40,cloudMat,0,0,0,c);box(w*.5,10,30,cloudMat,0,10,0,c);c.position.set((R2()-.5)*(WW+800)+WW/2,200+R2()*2400,-300);scene.add(c);return c});
 const R3=rnd(29);for(let x=-900;x<WW+900;){const w=18+R3()*40,h=30+R3()*110;box(w,h,30+R3()*30,'#0A0F1F',x+w/2,h/2,-250);x+=w+3+R3()*12}  // kota
 const moon=new THREE.Mesh(new THREE.SphereGeometry(22,12,8),new THREE.MeshBasicMaterial({color:'#E2E8F0',fog:false}));moon.position.set(300,250,-1500);cam.add(moon);
-box(6000,400,600,'#1E293B',WW/2,-200,0);const grass=box(6000,4,602,'#22C55E',WW/2,-2,0);            // lantai
+box(6000,400,600,'#1E293B',WW/2,-200,0);const grass=box(6002,4,602,'#22C55E',WW/2,-1.9,0);            // lantai
 box(400,40000,300,'#0A0F1F',-200,19800,0);box(400,40000,300,'#0A0F1F',WW+200,19800,0);           // dinding kiri/kanan
 const SKY=[[20,27,51],[45,27,78],[5,7,15]];
 const mix=(a,c,t)=>a.map((v,i)=>Math.round(v+(c[i]-v)*t));
@@ -297,7 +297,7 @@ function draw(){
   grass.material.color.set(fx.slip?'#A5F3FC':'#22C55E');
   // platform: mesh dibikin sekali, warna diupdate cuma yang di layar
   for(const pl of plats){if(pl.floor)continue;
-    if(!pl.mesh){pl.mesh=box(pl.w,10,40,'#fff',pl.x+pl.w/2,-pl.y-5,0);box(1,.3,1.02,'#fff',0,.35,0,pl.mesh)}
+    if(!pl.mesh){pl.mesh=box(pl.w,10,40,'#fff',pl.x+pl.w/2,-pl.y-5,0);box(1.02,.3,1.02,'#fff',0,.36,0,pl.mesh)}
     if(pl.y<camY-100||pl.y>camY+VH+100)continue;
     const bi=pl.y>-1000?0:pl.y>-2500?1:2;let body=['#5B3A29','#94A3B8','#3B0764'][bi],top=['#22C55E','#F1F5F9','#A78BFA'][bi];
     if(pl.spring){body='#A16207';top='#FACC15'}else if(pl.crumb){body='#57534E';top='#A8A29E'}else if(pl.move){body='#1E3A8A';top='#60A5FA'}
