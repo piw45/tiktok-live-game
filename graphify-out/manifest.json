@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "test.js": {
-    "mtime": 1790126357.3318567,
-    "seen": 1790126416.6004415,
-    "ast_hash": "224379058a5e1e78315038f88429e810",
+    "mtime": 1790215165.7985504,
+    "seen": 1790215611.7107654,
+    "ast_hash": "85775e8afac4372ae747607e210a278c",
     "semantic_hash": ""
   },
   "three.min.js": {
@@ -30,9 +30,9 @@
     "semantic_hash": ""
   },
   "game.html": {
-    "mtime": 1790126618.3762467,
-    "seen": 1790126671.4235878,
-    "ast_hash": "c7481f43c42943ed4b8b2145d24a84c3",
+    "mtime": 1790215554.6179757,
+    "seen": 1790215611.710786,
+    "ast_hash": "adfb54a41af2a7cd03f685b806cc37e2",
     "semantic_hash": ""
   }
 }

@@ -27,15 +27,15 @@ canvas{position:fixed;inset:0;width:100%;height:100%}
 .eff i{position:absolute;left:0;bottom:0;height:4px;background:rgba(255,255,255,.75)}
 #tr{grid-area:tr;justify-self:end;min-width:210px;max-width:300px}
 #board{list-style:none}
-#board li{display:flex;align-items:center;gap:8px;padding:3px 0}
+#board li{display:flex;align-items:center;gap:8px;padding:1px 0}
 #board li:first-child .av{border-color:var(--yellow);box-shadow:0 0 8px var(--yellow)}
 #board b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 #board span{color:var(--red)}
-#board2{list-style:none}#board2 li{display:flex;align-items:center;gap:8px;padding:3px 0}
+#board2{list-style:none}#board2 li{display:flex;align-items:center;gap:8px;padding:1px 0}
 #board2 b{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}#board2 span{color:var(--green)}
 .sub{margin-top:10px}
 #last{color:var(--muted);margin-top:4px}
-.av{width:28px;height:28px;border:2px solid var(--border);background:var(--blue);display:grid;place-items:center;font:12px 'Press Start 2P';overflow:hidden;flex:none}
+.av{width:24px;height:24px;border:2px solid var(--border);background:var(--blue);display:grid;place-items:center;font:12px 'Press Start 2P';overflow:hidden;flex:none}
 .av img{width:100%;height:100%;object-fit:cover}
 #bl{grid-area:bl;align-self:end;justify-self:start;max-width:min(60vw,400px);list-style:none;display:flex;flex-direction:column;gap:6px}
 #bl li{background:var(--card);border-left:4px solid var(--red);padding:4px 10px;opacity:.55}
@@ -68,14 +68,14 @@ body.quake .hud{animation:jit .08s infinite}
 #flash.go{animation:fl .5s}
 @keyframes fl{from{opacity:.9}to{opacity:0}}
 @media (prefers-reduced-motion:reduce){body.quake .hud,#flash.go,#toast.show{animation:none}}
-@media (max-width:600px){.hud{grid-template:"tl tr" auto "fxb fxb" auto ". ." 1fr "bl bl" auto "br br" auto "hint hint" auto/auto 1fr}#tr{min-width:0;justify-self:end}#bl{max-width:100%}}
+@media (max-aspect-ratio:7/8){.hud{grid-template:"tl tr" auto "fxb fxb" auto ". ." 1fr "bl bl" auto "hint hint" auto/auto 1fr}#tr{min-width:0;justify-self:end}#bl{max-width:68%}#br{grid-area:bl}}
 </style>
 </head>
 <body>
 <canvas id="c" aria-label="Game panjat, karakter dijatuhkan oleh gift penonton"></canvas>
 <div id="vig"></div><div id="flash"></div>
-<div class="hud">
-  <div id="tl" class="card"><div class="px"><span id="h">0.0m<small>REKOR <span id="best">0</span>m &middot; TARGET <span id="goalt">100</span>m</small></span></div><div id="meter"><div id="fill"></div><i id="mk"></i></div></div>
+<div class="hud" id="hud">
+  <div id="tl" class="card"><div class="px"><span id="h">0.0m<small>REKOR <span id="best">0</span>m<br>TARGET <span id="goalt">100</span>m</small></span></div><div id="meter"><div id="fill"></div><i id="mk"></i></div></div>
   <div id="fxb"></div>
   <div id="tr" class="card"><div class="px">PAPAN PENJATUH</div><ol id="board"></ol><div id="last"></div><div class="px sub">PAPAN PENOLONG</div><ol id="board2"></ol></div>
   <ul id="bl"></ul>
@@ -89,20 +89,21 @@ const $=id=>document.getElementById(id),cv=$('c');
 const WW=360,G=.5,JUMP=-12,ACC=.7,MAXV=5,RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // ---- 3D (three.js r158). Fisika tetap 2D: y negatif = ke atas, jadi three y = -y ----
-const FOV=50,scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(FOV,1,10,6000),ren=new THREE.WebGLRenderer({canvas:cv});
-ren.setPixelRatio(Math.min(devicePixelRatio,2));scene.add(cam);scene.background=new THREE.Color();scene.fog=new THREE.Fog(0,600,2000);
+const FOV=50,scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(FOV,1,10,6000),ren=new THREE.WebGLRenderer({canvas:cv,antialias:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));scene.add(cam);scene.fog=new THREE.Fog(0,600,2000);
 scene.add(new THREE.HemisphereLight(0xffffff,0x7a5030,1.5));const sun=new THREE.DirectionalLight(0xffffff,2.5);sun.position.set(-300,500,600);scene.add(sun);
 const BOX=new THREE.BoxGeometry(1,1,1),mat=(c,o)=>new THREE.MeshLambertMaterial({color:c,...o}),M4=new THREE.Matrix4(),C3=new THREE.Color();
 const box=(w,h,d,c,x,y,z,parent=scene)=>{const m=new THREE.Mesh(BOX,c.isMaterial?c:mat(c));m.scale.set(w,h,d);m.position.set(x,y,z);parent.add(m);return m};
 let VW,VH,camZ;
 function resize(){const s=Math.min(innerWidth/WW,innerHeight/600);VW=innerWidth/s;VH=innerHeight/s;
-  ren.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();camZ=VH/2/Math.tan(FOV*Math.PI/360)}
+  ren.setSize(innerWidth,innerHeight);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();camZ=VH/2/Math.tan(FOV*Math.PI/360);
+  $('hud').style.zoom=$('toast').style.zoom=Math.min(innerWidth/540,innerHeight/960)}   // HUD ikut skala layar: 540x960 (.exe) & 1080x1920 (OBS) kelihatan sama
 addEventListener('resize',resize);resize();
 
 // ---- dunia ----
 const p={x:170,y:0,w:20,h:28,vx:0,vy:0,on:null,landed:0};   // y = kaki, floor di y=0, ke atas negatif
 const plats=[{x:-2000,y:0,w:4480,floor:true}];
-let topY=0,lastX=170,camY=80-VH,shake=0,shakeHit=0,height=0,best=0,lastBy='',board={},hboard={},suspect=null,face=1,nextMile=10,goal=100;
+let topY=0,lastX=170,camY=200-VH,shake=0,shakeHit=0,height=0,best=0,lastBy='',board={},hboard={},suspect=null,face=1,nextMile=10,goal=100;
 const fx={wind:0,slip:0,quake:0,shield:0};let windDir=0,tNow=0,slow=0,stun=0,groundY=0,lastSave=-1e9;
 function gen(){while(topY>camY-VH-200){const w=70+Math.random()*70;topY-=70+Math.random()*60;
   lastX=Math.max(0,Math.min(WW-w,lastX+(Math.random()*2-1)*140));
@@ -143,24 +144,43 @@ function setFrame(f){if(f===curFr)return;curFr=f;FR[f].forEach(([x,y,c],i)=>{VOX
 
 // ---- background (seeded biar konsisten; parallax gratis dari perspektif) ----
 const rnd=s=>()=>(s=s*16807%2147483647)/2147483647;
-const R1=rnd(7),SP=new Float32Array(420);for(let i=0;i<140;i++)SP.set([WW/2+(R1()-.5)*5000,R1()*30000,-1500],i*3);
-const stars=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.BufferAttribute(SP,3)),
-  new THREE.PointsMaterial({size:4,sizeAttenuation:false,transparent:true,opacity:0,fog:false}));scene.add(stars);
-const R2=rnd(13),cloudMat=mat('#E2E8F0',{transparent:true,opacity:0}),CLOUDS=Array.from({length:12},()=>{const c=new THREE.Group(),w=60+R2()*100;
-  box(w,12,40,cloudMat,0,0,0,c);box(w*.5,10,30,cloudMat,0,10,0,c);c.position.set((R2()-.5)*(WW+800)+WW/2,200+R2()*2400,-300);scene.add(c);return c});
-const R3=rnd(29);for(let x=-900;x<WW+900;){const w=18+R3()*40,h=30+R3()*110;box(w,h,30+R3()*30,'#0A0F1F',x+w/2,h/2,-250);x+=w+3+R3()*12}  // kota
-const moon=new THREE.Mesh(new THREE.SphereGeometry(22,12,8),new THREE.MeshBasicMaterial({color:'#E2E8F0',fog:false}));moon.position.set(300,250,-1500);cam.add(moon);
-box(6000,400,600,'#1E293B',WW/2,-200,0);const grass=box(6002,4,602,'#22C55E',WW/2,-1.9,0);            // lantai
-box(400,40000,300,'#0A0F1F',-200,19800,0);box(400,40000,300,'#0A0F1F',WW+200,19800,0);           // dinding kiri/kanan
+const canvasTex=(w,h,f)=>{const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'));const t=new THREE.CanvasTexture(c);t.colorSpace=THREE.SRGBColorSpace;return t};
+const pix=(rows,pal)=>{const t=canvasTex(rows[0].length,rows.length,x=>rows.forEach((r,y)=>[...r].forEach((ch,i)=>{if(pal[ch]){x.fillStyle=pal[ch];x.fillRect(i,y,1,1)}})));
+  t.magFilter=t.minFilter=THREE.NearestFilter;return t};                            // pixel art string -> tekstur, kayak sprite hero
+const sky=canvasTex(1,64,()=>{}),skyX=sky.image.getContext('2d');scene.background=sky;   // gradien langit, digambar ulang tiap frame di draw()
+// bintang nempel kamera (kedalaman 3000) biar layar selalu penuh; geser pelan pas manjat = parallax
+const R1=rnd(7),NS=400,SP=new Float32Array(NS*3),SC=new Float32Array(NS*3),SB=Array.from({length:NS},()=>[(R1()-.5)*5600,R1()*2800,.35+R1()*.65,R1()*6]);
+const stars=new THREE.Points(new THREE.BufferGeometry().setAttribute('position',new THREE.BufferAttribute(SP,3)).setAttribute('color',new THREE.BufferAttribute(SC,3)),
+  new THREE.PointsMaterial({size:3,sizeAttenuation:false,vertexColors:true,transparent:true,opacity:0,fog:false}));cam.add(stars);
+const CLOUD=['..........WWWW..........','.....WWW.WWWWWWW........','....WWWWWWWWWWWWW.WWWW..','..WWWWWWWWWWWWWWWWWWWWW.',
+             '.WWWWWWWWWWWWWWWWWWWWWWW','WWWWWWWWWWWWWWWWWWWWWWWW','.SSSSSSSSSSSSSSSSSSSSSS.','....SSSSSSSSSSSSSSSSS...'];
+const R2=rnd(13),cloudMat=new THREE.SpriteMaterial({map:pix(CLOUD,{W:'#F1F5F9',S:'#CBD5E1'}),transparent:true,opacity:0,depthWrite:false}),
+  CLOUDS=Array.from({length:12},()=>{const c=new THREE.Sprite(cloudMat),k=5+R2()*4;c.scale.set(24*k*(R2()<.5?-1:1),8*k,1);   // awan pixel, bukan balok: gak ketuker sama pijakan
+    c.position.set((R2()-.5)*(WW+800)+WW/2,200+R2()*2400,-450);scene.add(c);return c});
+const WIN=new THREE.InstancedMesh(new THREE.PlaneGeometry(4,5),new THREE.MeshBasicMaterial(),900);WIN.count=0;scene.add(WIN);
+const R3=rnd(29);for(let x=-900;x<WW+900;){const w=18+R3()*40,h=30+R3()*110,d=30+R3()*30;box(w,h,d,'#0B1120',x+w/2,h/2,-250);   // kota + jendela nyala
+  for(let wy=12;wy<h-6;wy+=10)for(let wx=x+6;wx<x+w-4;wx+=8)if(R3()<.35&&WIN.count<900){WIN.setMatrixAt(WIN.count,M4.makeTranslation(wx,wy,-249.5+d/2));WIN.setColorAt(WIN.count++,C3.set(R3()<.8?'#FDE68A':'#67E8F9'))}
+  x+=w+3+R3()*12}
+const MOON=['....MMM....','..MMMMMMM..','.MMMMMmmMM.','.MMMMMmmMM.','MMmMMMMMMMM','MMMMMMMMMMM','MMMMMMMMmMM','.MmmMMMMMM.','.MmmMMMMMM.','..MMMMMMM..','....MMM....'];
+const moon=new THREE.Sprite(new THREE.SpriteMaterial({map:pix(MOON,{M:'#F1F5F9',m:'#CBD5E1'}),alphaTest:.5,fog:false}));moon.scale.set(48,48,1);moon.position.set(160,250,-1500);cam.add(moon);
+const halo=new THREE.Sprite(new THREE.SpriteMaterial({map:canvasTex(64,64,x=>{const g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(254,243,199,.45)');g.addColorStop(1,'rgba(254,243,199,0)');x.fillStyle=g;x.fillRect(0,0,64,64)}),
+  blending:THREE.AdditiveBlending,depthWrite:false,fog:false}));halo.scale.set(4,4,1);halo.position.z=-1;moon.add(halo);
+box(6000,400,600,'#1E293B',WW/2,-200,0);const grass=box(6002,4,602,'#15803D',WW/2,-1.9,0);            // lantai
+const shadow=new THREE.Mesh(new THREE.CircleGeometry(12,16),new THREE.MeshBasicMaterial({color:0,transparent:true,depthWrite:false}));shadow.rotation.x=-Math.PI/2;scene.add(shadow);   // bayangan: nunjukin bakal mendarat di mana
+const bubble=new THREE.Mesh(new THREE.IcosahedronGeometry(24,1),new THREE.MeshLambertMaterial({color:'#22C55E',emissive:'#14532D',transparent:true,opacity:.35,flatShading:true,depthWrite:false}));
+bubble.position.y=16;hero.add(bubble);                                                                   // perisai kelihatan di badan
+const bricks=canvasTex(16,16,x=>{x.fillStyle='#fff';x.fillRect(0,0,16,16);x.fillStyle='#999';x.fillRect(0,7,16,1);x.fillRect(0,15,16,1);x.fillRect(15,0,1,7);x.fillRect(7,8,1,7)});
+bricks.magFilter=THREE.NearestFilter;bricks.wrapS=bricks.wrapT=THREE.RepeatWrapping;bricks.repeat.set(300/32,40000/32);   // bata = kerasa naik walau belum ada awan/bintang
+const wall=mat('#1E293B',{map:bricks});box(400,40000,300,wall,-200,19800,0);box(400,40000,300,wall,WW+200,19800,0);           // dinding kiri/kanan
 const SKY=[[20,27,51],[45,27,78],[5,7,15]];
 const mix=(a,c,t)=>a.map((v,i)=>Math.round(v+(c[i]-v)*t));
 
 // ---- partikel ----
-const PMAX=900,parts=[],PTS=new THREE.InstancedMesh(BOX,new THREE.MeshBasicMaterial(),PMAX);PTS.setColorAt(0,C3);scene.add(PTS);
+const PMAX=900,parts=[],PTS=new THREE.InstancedMesh(BOX,new THREE.MeshBasicMaterial(),PMAX);PTS.setColorAt(0,C3);PTS.frustumCulled=false;scene.add(PTS);   // bounding sphere InstancedMesh r158 cuma dihitung sekali -> partikel ke-cull begitu kamera naik
 function spawn(n,x,y,c,o={}){for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*(o.sx||3),vy:-(Math.random()*(o.sy||2)),g:o.g??.15,life:o.life||40,c:Array.isArray(c)?c[i%c.length]:c,s:o.s||2})}
 function fxStep(dt){
   if(p.landed){spawn(6,p.x+p.w/2,p.y,'#94A3B8');SFX.land();p.landed=0}
-  if(fx.wind)for(let i=0;i<2;i++)parts.push({x:windDir<0?WW+10:-10,y:camY+Math.random()*VH,vx:windDir*(8+Math.random()*8),vy:Math.random()-.5,g:0,life:60,c:Math.random()<.5?'#22C55E':'#86EFAC',s:2});
+  if(fx.wind)for(let i=0;i<2;i++)parts.push({x:windDir<0?WW+10:-10,y:camY+Math.random()*VH,vx:windDir*(8+Math.random()*8),vy:Math.random()-.5,g:0,life:60,c:Math.random()<.5?'#22C55E':'#86EFAC',s:2,l:16});   // l = garis angin
   if(fx.quake&&Math.random()<.5)parts.push({x:Math.random()*WW,y:camY-10,vx:(Math.random()-.5)*2,vy:3+Math.random()*3,g:.2,life:120,c:'#7F1D1D',s:3});   // batu runtuh
   if(fx.shield&&Math.random()<.3)parts.push({x:p.x+p.w/2+(Math.random()-.5)*44,y:p.y-14+(Math.random()-.5)*36,vx:0,vy:-.4,g:0,life:22,c:'#22C55E',s:2});
   if(fx.slip&&Math.random()<.4)parts.push({x:Math.random()*WW,y:camY-10,vx:(Math.random()-.5)*.5,vy:1+Math.random(),g:0,life:220,c:'#E0F2FE',s:2});
@@ -211,7 +231,7 @@ function sabotage(ev){
   if(ev.type==='wind'){windDir=ev.dir||1;fx.wind=DUR.wind*(ev.coins?1:.7)}
   else if(ev.type in DUR)fx[ev.type]=DUR[ev.type];
   else if(ev.type==='vanish')vanish();
-  else if(ev.type==='reset'){p.x=170;p.y=0;p.vx=p.vy=0;camY=80-VH;groundY=0;stun=1200;slow=500;flash()}
+  else if(ev.type==='reset'){p.x=170;p.y=0;p.vx=p.vy=0;camY=200-VH;groundY=0;stun=1200;slow=500;flash()}
   else if(ev.type==='boost'){p.vy=JUMP*1.9;p.on=null;stun=0;spawn(20,p.x+p.w/2,p.y,['#FACC15','#22C55E'],{sx:4,sy:4,s:3})}
   else if(ev.type==='stair'){const sx=Math.max(0,Math.min(WW-110,p.x+p.w/2-55));
     for(let i=1;i<=3;i++)plats.push({x:sx,y:p.y-i*70,w:110,help:1});spawn(16,sx+55,p.y-70,'#22D3EE',{sx:6,sy:2})}
@@ -280,7 +300,7 @@ function step(dt){
   if(height>=goal){SFX.menang();flash();save(1);toast(`<div class="what px">TARGET ${goal}m TEMBUS!</div>`,'rekor');
     spawn(80,p.x+p.w/2,p.y-20,['#FACC15','#22C55E','#22D3EE','#DC2626','#fff'],{sx:12,sy:9,life:90,s:3});goal+=100;$('goalt').textContent=goal}
   if(suspect&&tNow-suspect.t<4000&&height<suspect.h-3){blame(suspect,suspect.h-height);suspect=null}
-  camY+=((p.y-VH*.6)-camY)*.1*dt;camY=Math.min(camY,80-VH);gen();
+  camY+=((p.y-VH*.6)-camY)*.1*dt;camY=Math.min(camY,200-VH);gen();
   shakeHit=Math.max(0,shakeHit-dt*.6);shake=RM?0:(fx.quake?12:0)+shakeHit;
 }
 
@@ -288,13 +308,17 @@ function step(dt){
 function draw(){
   const h=height,cx=WW/2+(p.x+p.w/2-WW/2)*.2,cy=-(camY+VH/2),sx=(Math.random()*2-1)*shake,sy=(Math.random()*2-1)*shake;
   cam.position.set(cx+sx,cy+60+sy,camZ);cam.lookAt(cx+sx,cy+sy,0);   // agak dari atas biar permukaan pijakan kelihatan
-  // langit: malam kota -> ungu awan -> luar angkasa; kabut oranye dekat tanah
-  const [r,g,bl]=h<100?mix(SKY[0],SKY[1],h/100):mix(SKY[1],SKY[2],Math.min(1,(h-100)/150));
-  scene.background.setStyle(`rgb(${r},${g},${bl})`);scene.fog.color.copy(scene.background).lerp(C3.set('#F97316'),.5*(1-Math.min(1,h/60)));
-  moon.position.y=250-h*.5;stars.material.opacity=Math.max(0,Math.min(1,(h-50)/100));
+  // langit: malam kota -> ungu awan -> luar angkasa; gradien: atas lebih gelap, bawah = warna kabut (oranye dekat tanah)
+  const z=h<100?mix(SKY[0],SKY[1],h/100):mix(SKY[1],SKY[2],Math.min(1,(h-100)/150)),bot=`rgb(${mix(z,[249,115,22],.4*(1-Math.min(1,h/50)))})`;
+  scene.fog.color.setStyle(bot);
+  const gr=skyX.createLinearGradient(0,0,0,64);gr.addColorStop(0,`rgb(${mix(z,[0,0,0],.5)})`);gr.addColorStop(1,bot);skyX.fillStyle=gr;skyX.fillRect(0,0,1,64);sky.needsUpdate=true;
+  moon.position.y=250-h*.5;
+  const so=Math.max(0,Math.min(1,(h-50)/100));stars.material.opacity=so;stars.visible=so>0;stars.material.size=2*innerHeight/VH;   // ukuran ikut skala dunia
+  if(so){SB.forEach(([x,y,b,ph],i)=>{SP.set([x,((y-cy*.25)%2800+2800)%2800-1400,-3000],i*3);SC.fill(b*(.7+.3*Math.sin(tNow*(.0005+ph*.0004)+ph)),i*3,i*3+3)});   // kelap-kelip
+    stars.geometry.attributes.position.needsUpdate=stars.geometry.attributes.color.needsUpdate=true}
   cloudMat.opacity=.85*Math.min(1,Math.max(0,(h-20)/40))*Math.max(0,Math.min(1,(260-h)/60));
   for(const c of CLOUDS){c.position.x+=.15;if(c.position.x>WW+500)c.position.x=-500}
-  grass.material.color.set(fx.slip?'#A5F3FC':'#22C55E');
+  grass.material.color.set(fx.slip?'#A5F3FC':'#15803D');
   // platform: mesh dibikin sekali, warna diupdate cuma yang di layar
   for(const pl of plats){if(pl.floor)continue;
     if(!pl.mesh){pl.mesh=box(pl.w,10,40,'#fff',pl.x+pl.w/2,-pl.y-5,0);box(1.02,.3,1.02,'#fff',0,.36,0,pl.mesh)}
@@ -307,10 +331,13 @@ function draw(){
     pl.mesh.material.color.set(body);pl.mesh.children[0].material.color.set(top);
     pl.mesh.position.x=pl.x+pl.w/2+(pl.warn?Math.random()*4-2:0)+(fx.quake&&!RM?Math.random()*3-1.5:0);
   }
-  const n=Math.min(parts.length,PMAX);for(let i=0;i<n;i++){const q=parts[i];PTS.setMatrixAt(i,M4.makeScale(q.s,q.s,q.s).setPosition(q.x,-q.y,22));PTS.setColorAt(i,C3.set(q.c))}
+  const n=Math.min(parts.length,PMAX);for(let i=0;i<n;i++){const q=parts[i];PTS.setMatrixAt(i,M4.makeScale(q.l||q.s,q.s,q.s).setPosition(q.x,-q.y,22));PTS.setColorAt(i,C3.set(q.c))}
   PTS.count=n;PTS.instanceMatrix.needsUpdate=true;PTS.instanceColor.needsUpdate=true;
   setFrame(!p.on?(p.vy<0?'jump':'fall'):Math.abs(p.vx)>.5?(Math.floor(tNow/90)%2?'run1':'run2'):'idle');
   hero.position.set(p.x+p.w/2,-p.y,0);hero.rotation.y+=((face<0?Math.PI:0)-hero.rotation.y)*.3;   // balik badan = muter
+  let gy=Infinity;for(const pl of plats)if(!pl.gone&&pl.y>=p.y-1&&pl.y<gy&&p.x+p.w>pl.x&&p.x<pl.x+pl.w)gy=pl.y;   // pijakan pertama di bawah kaki
+  const sd=Math.min(1,(gy-p.y)/250);shadow.position.set(p.x+p.w/2,.5-gy,0);shadow.scale.setScalar(1-sd*.6);shadow.material.opacity=.45*(1-sd);
+  bubble.visible=fx.shield>0&&(fx.shield>1500||Math.floor(tNow/90)%2===0);bubble.rotation.y=tNow/900;bubble.scale.setScalar(1+.04*Math.sin(tNow/120));   // kedip pas mau habis
   ren.render(scene,cam);
 }
 function hud(){

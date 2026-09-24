@@ -15,7 +15,7 @@ eval(src);
 const cx=q=>(q.bx??q.x)+q.w/2;
 for(let i=0;i<40;i++){camY-=300;gen()}
 for(let i=2;i<plats.length;i++){const a=plats[i-1],b=plats[i];console.assert(a.y-b.y<=130&&Math.abs(cx(a)-cx(b))<=140+(a.w+b.w)/2,'unreachable',i)}
-plats.length=1;topY=0;lastX=170;camY=80-VH;seed=13;gen();   // balikin dunia + seed, biar simulasi selalu dunia yang sama
+plats.length=1;topY=0;lastX=170;camY=200-VH;seed=13;gen();   // balikin dunia + seed, biar simulasi selalu dunia yang sama
 // simulate: dumb climber (hold jump, swap direction periodically)
 keys[' ']=1;keys.ArrowRight=1;
 for(let i=0;i<3000;i++){tNow=i*16.67;step(1);if(i%400===0)keys.ArrowRight=!keys.ArrowRight,keys.ArrowLeft=!keys.ArrowRight}
